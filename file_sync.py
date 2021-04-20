@@ -4,19 +4,9 @@ from enum import Enum
 from typing import List, NamedTuple, Optional
 
 
-def file_sync(source_dir: str, target_dir: str) -> None:
-    (_, _, target_files) = next(os.walk(target_dir))
-    for file in target_files:
-        os.remove(os.path.join(target_dir, file))
-
-    (_, _, source_files) = next(os.walk(source_dir))
-    for file in source_files:
-        shutil.copy(src=os.path.join(source_dir, file), dst=os.path.join(target_dir, file))
-
-
 class FileInfo(NamedTuple):
     name: str
-    contents_hash: int
+    content_hash: int
 
 
 class FileAction(NamedTuple):
@@ -27,6 +17,26 @@ class FileAction(NamedTuple):
     type: ActionType
     target: str
     source: Optional[str] = None
+
+
+def file_sync(source_dir: str, target_dir: str) -> None:
+    (_, _, target_files) = next(os.walk(target_dir))
+    target_file_info = [_file_to_file_info(target_dir, file) for file in target_files]
+    (_, _, source_files) = next(os.walk(source_dir))
+    source_file_info = [_file_to_file_info(source_dir, file) for file in source_files]
+    actions = get_sync_actions(source_files=source_file_info, target_files=target_file_info)
+
+    for action in actions:
+        if action.type == FileAction.ActionType.COPY:
+            shutil.copy(src=os.path.join(source_dir, action.source), dst=os.path.join(target_dir, action.target))
+        elif action.type == FileAction.ActionType.DELETE:
+            os.remove(os.path.join(target_dir, action.target))
+
+
+def _file_to_file_info(dir: str, file_name: str) -> FileInfo:
+    with open(os.path.join(dir, file_name), "r") as file:
+        content_hash = hash(file.read())
+        return FileInfo(name=file_name, content_hash=content_hash)
 
 
 def get_sync_actions(source_files: List[FileInfo], target_files: List[FileInfo]) -> List[FileAction]:

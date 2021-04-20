@@ -53,7 +53,7 @@ class TestGetSyncActions(unittest.TestCase):
 
     @staticmethod
     def _dir_dict_to_file_info(dir_dict: Dict[str, str]) -> List[FileInfo]:
-        return [FileInfo(name=name, contents_hash=hash(contents)) for name, contents in dir_dict.items()]
+        return [FileInfo(name=name, content_hash=hash(contents)) for name, contents in dir_dict.items()]
 
     def test_delete_one_file(self):
         file_name = "file_1.txt"
