@@ -1,6 +1,7 @@
 import os
 import shutil
 import unittest
+from typing import Dict, List
 
 from file_sync import file_sync, FileInfo, get_sync_actions, FileAction
 
@@ -41,25 +42,33 @@ class TestFileSync(unittest.TestCase):
 
 class TestGetSyncActions(unittest.TestCase):
     def test_copy_one_file(self):
-        # source = {"file1.txt": "file contents"}
-        # target = {}
         file_name = "file_1.txt"
-        source_files = [FileInfo(name=file_name, contents_hash="fake_hash")]
-        target_files = []
+        source = {file_name: "file contents"}
+        target = {}
 
-        actions = get_sync_actions(source_files=source_files, target_files=target_files)
+        actions = get_sync_actions(
+            source_files=self._dir_dict_to_file_info(source),
+            target_files=self._dir_dict_to_file_info(target))
         self.assertEqual(
             [FileAction(type=FileAction.ActionType.COPY, source=file_name, target=file_name)],
             actions)
 
+    @staticmethod
+    def _dir_dict_to_file_info(dir_dict: Dict[str, str]) -> List[FileInfo]:
+        return [FileInfo(name=name, contents_hash=hash(contents)) for name, contents in dir_dict.items()]
+
     def test_delete_one_file(self):
         file_name = "file_1.txt"
-        source_files = []
-        target_files = [FileInfo(name=file_name, contents_hash="fake_hash")]
+        source = {}
+        target = {file_name: "file contents"}
 
-        actions = get_sync_actions(source_files=source_files, target_files=target_files)
+        actions = get_sync_actions(
+            source_files=self._dir_dict_to_file_info(source),
+            target_files=self._dir_dict_to_file_info(target))
         self.assertEqual(
             [FileAction(type=FileAction.ActionType.DELETE, target=file_name)],
             actions)
 
+    def _validate_actions(self, source: Dict[str, str], target: Dict[str, str], actions: List[FileAction]):
+        self.assertEqual(source, target)
 

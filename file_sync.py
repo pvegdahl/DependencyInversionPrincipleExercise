@@ -16,7 +16,7 @@ def file_sync(source_dir: str, target_dir: str) -> None:
 
 class FileInfo(NamedTuple):
     name: str
-    contents_hash: str
+    contents_hash: int
 
 
 class FileAction(NamedTuple):
