@@ -2,7 +2,7 @@ import os
 import shutil
 import unittest
 
-from file_sync import file_sync
+from file_sync import file_sync, FileInfo, get_sync_actions, FileAction
 
 
 class TestFileSync(unittest.TestCase):
@@ -37,3 +37,19 @@ class TestFileSync(unittest.TestCase):
 
         file_sync(source_dir=self.source_dir_name, target_dir=self.target_dir_name)
         self.assertFalse(os.path.exists(os.path.join(self.target_dir_name, file_name)))
+
+
+class TestGetSyncActions(unittest.TestCase):
+    def test_copy_one_file(self):
+        # source = {"file1.txt": "file contents"}
+        # target = {}
+        file_name = "file_1.txt"
+        source_files = [FileInfo(name=file_name, contents_hash="fake_hash")]
+        target_files = []
+
+        actions = get_sync_actions(source_files=source_files, target_files=target_files)
+        self.assertEqual(
+            [FileAction(type=FileAction.ActionType.COPY, source=file_name, target=file_name)],
+            actions)
+
+
