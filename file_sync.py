@@ -1,7 +1,7 @@
 import os
 import shutil
 from enum import Enum
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 
 
 def file_sync(source_dir: str, target_dir: str) -> None:
@@ -25,12 +25,15 @@ class FileAction(NamedTuple):
         DELETE = "DELETE"
 
     type: ActionType
-    source: str
     target: str
+    source: Optional[str] = None
 
 
 def get_sync_actions(source_files: List[FileInfo], target_files: List[FileInfo]) -> List[FileAction]:
     actions = []
+    for file in target_files:
+        actions.append(FileAction(type=FileAction.ActionType.DELETE, target=file.name))
+
     for file in source_files:
         actions.append(FileAction(type=FileAction.ActionType.COPY, source=file.name, target=file.name))
     return actions

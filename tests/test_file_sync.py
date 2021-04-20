@@ -52,4 +52,14 @@ class TestGetSyncActions(unittest.TestCase):
             [FileAction(type=FileAction.ActionType.COPY, source=file_name, target=file_name)],
             actions)
 
+    def test_delete_one_file(self):
+        file_name = "file_1.txt"
+        source_files = []
+        target_files = [FileInfo(name=file_name, contents_hash="fake_hash")]
+
+        actions = get_sync_actions(source_files=source_files, target_files=target_files)
+        self.assertEqual(
+            [FileAction(type=FileAction.ActionType.DELETE, target=file_name)],
+            actions)
+
 
