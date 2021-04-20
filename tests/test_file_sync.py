@@ -49,9 +49,7 @@ class TestGetSyncActions(unittest.TestCase):
         actions = get_sync_actions(
             source_files=self._dir_dict_to_file_info(source),
             target_files=self._dir_dict_to_file_info(target))
-        self.assertEqual(
-            [FileAction(type=FileAction.ActionType.COPY, source=file_name, target=file_name)],
-            actions)
+        self._validate_actions(source=source, target=target, actions=actions)
 
     @staticmethod
     def _dir_dict_to_file_info(dir_dict: Dict[str, str]) -> List[FileInfo]:
@@ -65,10 +63,13 @@ class TestGetSyncActions(unittest.TestCase):
         actions = get_sync_actions(
             source_files=self._dir_dict_to_file_info(source),
             target_files=self._dir_dict_to_file_info(target))
-        self.assertEqual(
-            [FileAction(type=FileAction.ActionType.DELETE, target=file_name)],
-            actions)
+        self._validate_actions(source=source, target=target, actions=actions)
 
     def _validate_actions(self, source: Dict[str, str], target: Dict[str, str], actions: List[FileAction]):
+        for action in actions:
+            if action.type == FileAction.ActionType.COPY:
+                target[action.target] = source[action.source]
+            elif action.type == FileAction.ActionType.DELETE:
+                del target[action.target]
         self.assertEqual(source, target)
 
