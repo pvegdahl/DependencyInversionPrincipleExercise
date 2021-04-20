@@ -12,11 +12,13 @@ class FileInfo(NamedTuple):
 class FileAction(NamedTuple):
     class ActionType(Enum):
         COPY = "COPY"
+        MOVE = "MOVE"
         DELETE = "DELETE"
 
     type: ActionType
-    target: str
     source: Optional[str] = None
+    target: Optional[str] = None
+    to_delete: Optional[str] = None
 
 
 def file_sync(source_dir: str, target_dir: str) -> None:
@@ -42,13 +44,13 @@ def _execute_actions(source_dir: str, target_dir: str, actions: List[FileAction]
         if action.type == FileAction.ActionType.COPY:
             shutil.copy(src=os.path.join(source_dir, action.source), dst=os.path.join(target_dir, action.target))
         elif action.type == FileAction.ActionType.DELETE:
-            os.remove(os.path.join(target_dir, action.target))
+            os.remove(os.path.join(target_dir, action.to_delete))
 
 
 def get_sync_actions(source_files: List[FileInfo], target_files: List[FileInfo]) -> List[FileAction]:
     actions = []
     for file in target_files:
-        actions.append(FileAction(type=FileAction.ActionType.DELETE, target=file.name))
+        actions.append(FileAction(type=FileAction.ActionType.DELETE, to_delete=file.name))
 
     for file in source_files:
         actions.append(FileAction(type=FileAction.ActionType.COPY, source=file.name, target=file.name))

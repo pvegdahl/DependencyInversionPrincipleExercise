@@ -70,6 +70,6 @@ class TestGetSyncActions(unittest.TestCase):
             if action.type == FileAction.ActionType.COPY:
                 target[action.target] = source[action.source]
             elif action.type == FileAction.ActionType.DELETE:
-                del target[action.target]
+                del target[action.to_delete]
         self.assertEqual(source, target)
 
