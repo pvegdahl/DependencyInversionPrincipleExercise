@@ -1,24 +1,8 @@
 import os
 import shutil
-from enum import Enum
-from typing import List, NamedTuple, Optional
+from typing import List
 
-
-class FileInfo(NamedTuple):
-    name: str
-    content_hash: int
-
-
-class FileAction(NamedTuple):
-    class ActionType(Enum):
-        COPY = "COPY"
-        MOVE = "MOVE"
-        DELETE = "DELETE"
-
-    type: ActionType
-    source: Optional[str] = None
-    target: Optional[str] = None
-    to_delete: Optional[str] = None
+from business_logic import get_sync_actions, FileInfo, FileAction
 
 
 def file_sync(source_dir: str, target_dir: str) -> None:
@@ -45,13 +29,3 @@ def _execute_actions(source_dir: str, target_dir: str, actions: List[FileAction]
             shutil.copy(src=os.path.join(source_dir, action.source), dst=os.path.join(target_dir, action.target))
         elif action.type == FileAction.ActionType.DELETE:
             os.remove(os.path.join(target_dir, action.to_delete))
-
-
-def get_sync_actions(source_files: List[FileInfo], target_files: List[FileInfo]) -> List[FileAction]:
-    actions = []
-    for file in target_files:
-        actions.append(FileAction(type=FileAction.ActionType.DELETE, to_delete=file.name))
-
-    for file in source_files:
-        actions.append(FileAction(type=FileAction.ActionType.COPY, source=file.name, target=file.name))
-    return actions
